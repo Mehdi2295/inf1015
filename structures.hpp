@@ -8,7 +8,7 @@
 #include <functional>
 #include <cassert>
 #include "gsl/span"
-#include "Interface.hpp"
+
 using gsl::span;
 using namespace std;
 
@@ -74,7 +74,14 @@ private:
 };
 using ListeActeurs = Liste<Acteur>;
 
-class Item : public Affichable{
+class Affichable {
+
+public:
+
+	virtual string afficher() = 0;
+};
+
+class Item : public Affichable {
 public:
 	Item() = default;
 
@@ -86,30 +93,33 @@ public:
 	int annee_ = 0;
 	string titre_;
 
-	string afficher() { 
-		return titre_ << " est sorti en " << annee_;
+	virtual string afficher() {
+		return titre_ + " est sorti en " + std::to_string(annee_);
 	}
-	operator<< (ostream os) {
+
+	Item* operator<< (ostream&& os) {
 		os << afficher();
+		return this;
 	}
 };
 
-class Film: virtual public Item
+class Film : virtual public Item
 {
 public:
 	Film() = default;
-	Film(string titre, string realisateur){ titre_ = titre; realisateur_ = realisateur; }
-	Film(const Film &f): Item(f.titre_, f.annee_), realisateur_(f.realisateur_) {}
+	Film(string titre, string realisateur) { titre_ = titre; realisateur_ = realisateur; }
+	Film(const Film& f) : Item(f.titre_, f.annee_), realisateur_(f.realisateur_) {}
 	string realisateur_; // Titre et nom du réalisateur (on suppose qu'il n'y a qu'un réalisateur).
 	int anneeSortie = 0, recette = 0; // Année de sortie et recette globale du film en millions de dollars
 	ListeActeurs acteurs_;
 
-	string afficher() {
-		return titre_ << " est sorti en " << annee_ << ", ce film a ete realisé par " << realisateur_ << " et a genéré " << recette << "$";
+	virtual string afficher() {
+		return titre_ + " est sorti en " + std::to_string(annee_) + ", ce film a ete realisé par " + realisateur_ + " et a genéré " + std::to_string(recette) + "$";
 	}
 
-	operator<< (ostream os) {
+	virtual Item* operator<< (ostream& os) {
 		os << afficher();
+		return this;
 	}
 };
 
@@ -123,17 +133,18 @@ class Livre : virtual public Item
 {
 public:
 	Livre() = default;
-	Livre(const Livre &l): Item(l.titre_, l.annee_), recette_(l.recette_), nombrePages_(l.nombrePages_) {}
+	Livre(const Livre& l) : Item(l.titre_, l.annee_), recette_(l.recette_), nombrePages_(l.nombrePages_) {}
 	string auteur_;
 	int recette_ = 0;
 	int nombrePages_ = 0;
 
-	string afficher() {
-		return titre_ << " est sorti en " << annee_ << ", ce livre a été écrit par " << auteur_ << " ,il contient " << nombrePages_ << " et a genéré " << recette << "$";
+	virtual string afficher() {
+		return titre_ + " est sorti en " + std::to_string(annee_) + ", ce livre a été écrit par " + auteur_ + " ,il contient " + std::to_string(nombrePages_) + " et a genéré " + std::to_string(recette_) + "$";
 	}
 
-	operator<< (ostream os) {
+	virtual Item* operator<< (ostream& os) {
 		os << afficher();
+		return this;
 	}
 };
 
@@ -145,4 +156,11 @@ public:
 
 	LivreFilm(const Livre& l, const Film& f) : Item(f.titre_, f.annee_), Livre(l), Film(f) {}
 
+	string afficher() {
+		return "";
+	}
+	Item* operator<< (ostream& os) {
+		os << afficher();
+		return this;
+	}
 };
