@@ -77,6 +77,12 @@ using ListeActeurs = Liste<Acteur>;
 class Item : public Affichable{
 public:
 	Item() = default;
+
+	Item(const string titre, const int annee) {
+		titre_ = titre;
+		annee_ = annee;
+	}
+
 	int annee_ = 0;
 	string titre_;
 
@@ -88,11 +94,12 @@ public:
 	}
 };
 
-class Film: public Item
+class Film: virtual public Item
 {
 public:
 	Film() = default;
-	Film(string titre, string realisateur){ titre_ = titre; realisateur_ = realisateur; };
+	Film(string titre, string realisateur){ titre_ = titre; realisateur_ = realisateur; }
+	Film(const Film &f): Item(f.titre_, f.annee_), realisateur_(f.realisateur_) {}
 	string realisateur_; // Titre et nom du réalisateur (on suppose qu'il n'y a qu'un réalisateur).
 	int anneeSortie = 0, recette = 0; // Année de sortie et recette globale du film en millions de dollars
 	ListeActeurs acteurs_;
@@ -112,10 +119,11 @@ struct Acteur
 };
 
 
-class Livre : public Item
+class Livre : virtual public Item
 {
 public:
 	Livre() = default;
+	Livre(const Livre &l): Item(l.titre_, l.annee_), recette_(l.recette_), nombrePages_(l.nombrePages_) {}
 	string auteur_;
 	int recette_ = 0;
 	int nombrePages_ = 0;
@@ -127,4 +135,14 @@ public:
 	operator<< (ostream os) {
 		os << afficher();
 	}
+};
+
+
+class LivreFilm : public Livre, public Film
+{
+public:
+	LivreFilm() = default;
+
+	LivreFilm(const Livre& l, const Film& f) : Item(f.titre_, f.annee_), Livre(l), Film(f) {}
+
 };

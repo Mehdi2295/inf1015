@@ -311,7 +311,7 @@ int main()
 		vecteur.push_back(lireLivre(fichierLivres));
 	}
 
-	for (const void&& i : vecteur) {
+	for (const auto&& i : vecteur) {
 		cout << i;
 	}
 
